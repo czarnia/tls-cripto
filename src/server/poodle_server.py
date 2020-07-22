@@ -18,9 +18,9 @@ def main():
 	request_skt.send_with_size("Hola cliente!")
 
 	msg = "hola"
-	while (msg!="0"):
+	while (msg!=b'0'.hex()):
 		msg = request_skt.receive_with_size()
-		print(f"Soy el servidor y recibi: {msg}")
+		print(f"Soy el servidor y recibi: {bytes.fromhex(msg)}")
 
 	request_skt.close()
 	skt.close()

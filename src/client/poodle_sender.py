@@ -187,8 +187,8 @@ def main():
 				request = split_len(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))), 32)
 				print(request)
 				#skt.send_with_size("Hola")
-				skt.send_with_size(str(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char)))))
-				skt.send_with_size("0")
+				skt.send_with_size(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))).hex())
+				skt.send_with_size(b'0'.hex())
 				exit()
 
 
