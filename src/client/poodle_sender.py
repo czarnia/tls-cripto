@@ -67,91 +67,16 @@ def decrypt( enc):
     return plaintext
 
 
-'''
-    the main attack start here
-    the function run(SECRET) will try to decipher the SECRET without knowing the key 
-    used for AES
-'''
-
 def split_len(seq, length):
     return [seq[i:i+length] for i in range(0, len(seq), length)]
-
-def run(SECRET):
-    
-    secret = []
-
-    length_block = 16
-
-    a = encrypt(SECRET)
-    print(binascii.hexlify(encrypt(SECRET)))
-    print(decrypt(a))
-    #exit()
-
-    # fill the last block with full padding 0f
-    t = binascii.hexlify(encrypt(SECRET))
-    original_length = len(t)
-    t = 1
-    while(True):
-        length = len(binascii.hexlify(encrypt("a"*t + SECRET)))
-        if( length > original_length ):
-            break
-        t += 1
-    save = t
-    v = []
-
-    # we can decipher block_1...block_n-2 => the plaintext
-    print("[+] Start Deciphering using POA...")
-    for block in range(original_length//32-2,0,-1):
-        for char in range(length_block):
-            count = 0
-            while True:
-
-                randkey()
-                request = split_len(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))), 32)
-                print(request)
-                skt.send_with_size("Hola")
-                skt.send_with_size(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))))
-                exit()
-                # change the last block with a block of our choice
-                request[-1] = request[block]
-                # send the request a get the result => padding error OR OK
-                cipher = binascii.unhexlify(b''.join(request).decode())
-                plain = decrypt(cipher)
-                count += 1
-                print(count)
-
-                if plain != 0:
-                    t += 1
-                    pbn = request[-2]
-                    pbi = request[block - 1]
-                    # padding is ok we found a byte
-                    decipher_byte = chr(int("0f",16) ^ int(pbn[-2:],16) ^ int(pbi[-2:],16))
-                    secret.append(decipher_byte)
-                    tmp = secret[::-1]
-                    sys.stdout.write("\r[+] Found byte \033[36m%s\033[0m - Block %d : [%16s]" % (decipher_byte, block, ''.join(tmp)))
-                    sys.stdout.flush()
-                    #exit()
-                    break
-        print('')
-        secret = secret[::-1]
-        v.append(('').join(secret))
-        secret = []
-        t = save
-
-    v = v[::-1]
-    plaintext = re.sub('^#+','',('').join(v))
-    print("\n\033[32m{-} Deciphered plaintext\033[0m :", plaintext)
-    return v
-
 
 def main():
 	skt = StringSocket()
 
 	skt.connect("server", 8080)
-	print("Soy el cliente y me conecte al servidor")
+	print("Soy el cliente y me conecté.")
 
-	msg = skt.receive_with_size()
-	print(f"Soy el cliente y recibi: {msg}")
+	msg = ""
 
 	SECRET = "CRIPTOFIUBA2020"
 
@@ -160,9 +85,6 @@ def main():
 	length_block = 16
 
 	a = encrypt(SECRET)
-	print(binascii.hexlify(encrypt(SECRET)))
-	print(decrypt(a))
-	#exit()
 
 	# fill the last block with full padding 0f
 	t = binascii.hexlify(encrypt(SECRET))
@@ -175,59 +97,26 @@ def main():
 		t += 1
 	save = t
 	v = []
-	print(t)
 
 	# we can decipher block_1...block_n-2 => the plaintext
-	#print("[+] Start Deciphering using POA...")
 	for block in range(original_length//32-2,0,-1):
 		for char in range(length_block):
 			count = 0
 			while True:
-
 				randkey()
 				request = split_len(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))), 32)
-				#print(request)
-				#print(IV)
-				#print(KEY)
-				#skt.send_with_size("Hola")
+				# Envío el bloque encriptado
 				skt.send_with_size(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))).hex())
+				# Envío el initializator para luego simular si el server "acepta" el paquete o no.
 				skt.send_with_size(IV.hex())
+				# Envío la clave para luego simular si el server "acepta" el paquete o no.
 				skt.send_with_size(KEY.hex())
-				#skt.send_with_size(b'0'.hex())
-				# change the last block with a block of our choice
-				#print(request)
-				#print(IV)
-				#print(KEY)
-				#print(block)
-				request[-1] = request[block]
-				# send the request a get the result => padding error OR OK
-				cipher = binascii.unhexlify(b''.join(request).decode())
-				plain = decrypt(cipher)
-				count += 1
-				#print(cipher)
-				#print(count)
-				#input("afuera Press Enter to continue...")
 
-				if plain != 0:
-					print("entro")
-					#exit()
+				msg = skt.receive_with_size()
+				if (msg == "Adivinado"):
+					print ("Sigo enviando.")
 					t += 1
-					pbn = request[-2]
-					pbi = request[block - 1]
-					# padding is ok we found a byte
-					decipher_byte = chr(int("0f",16) ^ int(pbn[-2:],16) ^ int(pbi[-2:],16))
-					secret.append(decipher_byte)
-					tmp = secret[::-1]
-					sys.stdout.write("\r[+] Found byte \033[36m%s\033[0m - Block %d : [%16s]" % (decipher_byte, block, ''.join(tmp)))
-					sys.stdout.flush()
-					input("ADENTRO Press Enter to continue...")
-					#exit()
-					break				
-				#exit()
-
-
-	skt.send_with_size(b'0'.hex())
-
+					break
 	skt.close()
 
 if __name__ == '__main__':
