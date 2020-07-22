@@ -175,6 +175,7 @@ def main():
 		t += 1
 	save = t
 	v = []
+	print(t)
 
 	# we can decipher block_1...block_n-2 => the plaintext
 	print("[+] Start Deciphering using POA...")
@@ -188,15 +189,11 @@ def main():
 				print(request)
 				#skt.send_with_size("Hola")
 				skt.send_with_size(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))).hex())
-				skt.send_with_size(b'0'.hex())
-				exit()
+				#skt.send_with_size(b'0'.hex())
+				#exit()
 
 
-	print("Soy el cliente y voy a enviar: {SECRET} encriptado")
-
-	skt.send_with_size("Hola")
-
-	skt.send_with_size("0")
+	skt.send_with_size(b'0'.hex())
 
 	skt.close()
 
