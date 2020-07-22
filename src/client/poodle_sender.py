@@ -178,7 +178,7 @@ def main():
 	print(t)
 
 	# we can decipher block_1...block_n-2 => the plaintext
-	print("[+] Start Deciphering using POA...")
+	#print("[+] Start Deciphering using POA...")
 	for block in range(original_length//32-2,0,-1):
 		for char in range(length_block):
 			count = 0
@@ -186,10 +186,36 @@ def main():
 
 				randkey()
 				request = split_len(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))), 32)
-				print(request)
+				#print(request)
+				#print(IV)
+				#print(KEY)
 				#skt.send_with_size("Hola")
 				skt.send_with_size(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))).hex())
+				skt.send_with_size(IV.hex())
+				skt.send_with_size(KEY.hex())
 				#skt.send_with_size(b'0'.hex())
+				# change the last block with a block of our choice
+				request[-1] = request[block]
+				# send the request a get the result => padding error OR OK
+				cipher = binascii.unhexlify(b''.join(request).decode())
+				plain = decrypt(cipher)
+				count += 1
+				print(count)
+
+				if plain != 0:
+					print("entro")
+					#exit()
+					t += 1
+					pbn = request[-2]
+					pbi = request[block - 1]
+					# padding is ok we found a byte
+					decipher_byte = chr(int("0f",16) ^ int(pbn[-2:],16) ^ int(pbi[-2:],16))
+					secret.append(decipher_byte)
+					tmp = secret[::-1]
+					sys.stdout.write("\r[+] Found byte \033[36m%s\033[0m - Block %d : [%16s]" % (decipher_byte, block, ''.join(tmp)))
+					sys.stdout.flush()
+					#exit()
+					break				
 				#exit()
 
 

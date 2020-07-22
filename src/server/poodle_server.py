@@ -160,20 +160,37 @@ def main():
 	block=0
 	length_block=16
 	msg = "hola"
+	coming = 0
 	while (msg!=b'0'.hex()):
-		msg = request_skt.receive_with_size()
+		if (coming == 0):
+			msg = request_skt.receive_with_size()
+			coming +=1
+		if (coming == 1):
+			global IV
+			IV = bytes.fromhex(request_skt.receive_with_size())
+			coming +=1
+		if (coming == 2):
+			global KEY
+			KEY = bytes.fromhex(request_skt.receive_with_size())
+			coming = 0
 		#print(f"Soy el servidor y recibi: {bytes.fromhex(msg)}")
+		#print(msg)
 		count=0
 		msg = split_len(bytes.fromhex(msg),32)
+		#print(msg)
+		#exit()
+		#print(msg)
+		#print(IV)
+		#print(KEY)
 		msg[-1] = msg[block]
 		# send the request a get the result => padding error OR OK
 		cipher = binascii.unhexlify(b''.join(msg).decode())
 		plain = decrypt(cipher)
 		count += 1
-		#print(plain)
+		#print(cipher)
 
-		if plain != 0:
-			print(plain)
+		if ((plain != 0) and (coming == 0)):
+			print("entro")
 			t += 1
 			pbn = msg[-2]
 			pbi = msg[block - 1]
@@ -184,7 +201,7 @@ def main():
 			sys.stdout.write("\r[+] Found byte \033[36m%s\033[0m - Block %d : [%16s]" % (decipher_byte, block, ''.join(tmp)))
 			sys.stdout.flush()
 			#exit()
-			break
+			#break
 
 
 
