@@ -157,7 +157,7 @@ def main():
 	request_skt.send_with_size("Hola cliente!")
 	secret = []
 	t=1
-	block=0
+	block=1
 	length_block=16
 	msg = "hola"
 	coming = 0
@@ -182,6 +182,7 @@ def main():
 		#print(msg)
 		#print(IV)
 		#print(KEY)
+		#print(block)
 		msg[-1] = msg[block]
 		# send the request a get the result => padding error OR OK
 		cipher = binascii.unhexlify(b''.join(msg).decode())
@@ -191,6 +192,9 @@ def main():
 
 		if ((plain != 0) and (coming == 0)):
 			print("entro")
+			print(msg)
+			print(IV)
+			print(KEY)
 			t += 1
 			pbn = msg[-2]
 			pbi = msg[block - 1]

@@ -195,12 +195,18 @@ def main():
 				skt.send_with_size(KEY.hex())
 				#skt.send_with_size(b'0'.hex())
 				# change the last block with a block of our choice
+				#print(request)
+				#print(IV)
+				#print(KEY)
+				#print(block)
 				request[-1] = request[block]
 				# send the request a get the result => padding error OR OK
 				cipher = binascii.unhexlify(b''.join(request).decode())
 				plain = decrypt(cipher)
 				count += 1
-				print(count)
+				#print(cipher)
+				#print(count)
+				#input("afuera Press Enter to continue...")
 
 				if plain != 0:
 					print("entro")
@@ -214,6 +220,7 @@ def main():
 					tmp = secret[::-1]
 					sys.stdout.write("\r[+] Found byte \033[36m%s\033[0m - Block %d : [%16s]" % (decipher_byte, block, ''.join(tmp)))
 					sys.stdout.flush()
+					input("ADENTRO Press Enter to continue...")
 					#exit()
 					break				
 				#exit()
