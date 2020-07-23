@@ -16,4 +16,5 @@ Se tienen tres pruebas de concepto:
 - Cliente y servidor con TLS.
 - Ataque POODLE.
 
-Para ejecutar las mismas se debe entrar a los containers con ``docker exec -it <nombre_del_container> /bin/sh`` y correr los distintos archivos python, siempre ejecutando primero el servidor y luego el cliente. Los resultados se verán por pantalla.
+Para usar las mismas se debe entrar a los containers con ``docker exec -it <nombre_del_container> /bin/sh`` y correr los distintos archivos python, siempre ejecutando primero el servidor y luego el cliente. Los resultados se verán por pantalla.
+Para eliminar los containers basta con ejecutar ``docker-compose down`` en una terminal parada dentro de la carpeta _root_ de este proyecto.
