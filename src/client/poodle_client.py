@@ -11,6 +11,9 @@ sys.path.append('../')
 
 from common.string_socket import StringSocket
 
+SECRET = "auth:CRIPTO2020"
+LENGTH_BLOCK = 16
+
 IV = Random.new().read( AES.block_size )
 KEY = Random.new().read( AES.block_size )
 
@@ -31,7 +34,7 @@ def encrypt( msg):
     hash = hmac.new(KEY, data, hashlib.sha256).digest()
     padding = pad(data + hash)
     raw = data + hash + padding.encode()
-    cipher = AES.new(KEY, AES.MODE_CBC, IV )
+    cipher = AES.new(KEY, AES.MODE_CBC, IV)
     return cipher.encrypt( raw )
 
 def split_len(seq, length):
@@ -43,37 +46,25 @@ def main():
 	skt.connect("server", 8080)
 	print("Soy el cliente y me conecté.")
 
-	msg = ""
-
-	SECRET = "auth:CRIPTO2020"
-
-	secret = []
-
-	length_block = 16
-
-	a = encrypt(SECRET)
-
 	# fill the last block with full padding 0f
 	t = binascii.hexlify(encrypt(SECRET))
 	original_length = len(t)
+
 	t = 1
-	while(True):
+	while True:
 		length = len(binascii.hexlify(encrypt("a"*t + SECRET)))
-		if( length > original_length ):
+		if(length > original_length):
 			break
 		t += 1
-	save = t
-	v = []
 
 	# we can decipher block_1...block_n-2 => the plaintext
 	for block in range(original_length//32-2,0,-1):
-		for char in range(length_block):
-			count = 0
+		for char in range(LENGTH_BLOCK):
 			while True:
 				randkey()
-				request = split_len(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))), 32)
+				
 				# Envío el bloque encriptado
-				skt.send_with_size(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*length_block - char))).hex())
+				skt.send_with_size(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*LENGTH_BLOCK - char))).hex())
 				# Envío el initializator para luego simular si el server "acepta" el paquete o no.
 				skt.send_with_size(IV.hex())
 				# Envío la clave para luego simular si el server "acepta" el paquete o no.
