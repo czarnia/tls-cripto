@@ -1,6 +1,8 @@
 # tls-cripto
 Repositorio para el trabajo final de Criptografía y Seguridad Informática, contiene las pruebas de concepto utilizadas para la realización del mismo.
 
+![Poodle Attack in Dockers!](https://raw.githubusercontent.com/czarnia/tls-cripto/Poodle-PoC/poodle-attack.gif)
+
 ## Requerimientos
 
 - Docker
