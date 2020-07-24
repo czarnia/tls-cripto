@@ -1,44 +1,18 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-'''
-    Poodle attack - PoC
-    Implementation of the cryptography behind the attack
-    Author: mpgn <martial.puygrenier@gmail.com> - 2016
-    Update : 2018 - refactor to python3
-'''
+'''This PoC uses the Poodle attack - PoC of mpgn <martial.puygrenier@gmail.com>'''
 
 import binascii
 import sys
-import re
-import hmac, hashlib, base64
+import hmac, hashlib
 from Crypto.Cipher import AES
 from Crypto import Random
+
 import sys
 sys.path.append('../')
 
 from common.string_socket import StringSocket
 
-"""
-    Implementation of AES-256 with CBC cipher mode
-    cipher = plaintext + hmac + padding
-    IV and KEY are random
-    there is no handshake (no need) 
-"""
-
-IV = Random.new().read( AES.block_size )
-KEY = Random.new().read( AES.block_size )
-
-# generate random key and iv
-def randkey():
-    global IV 
-    IV = Random.new().read( AES.block_size )
-    global KEY 
-    KEY = Random.new().read( AES.block_size )
-
-# padding for the CBC cipher block
-def pad(s):
-    return (16 - len(s) % 16) * chr((16 - len(s) - 1) % 16)
+IV = Random.new().read(AES.block_size )
+KEY = Random.new().read(AES.block_size )
 
 # unpad after the decryption 
 # return the msg, the hmac and the hmac of msg 
@@ -48,30 +22,14 @@ def unpad_verifier(s):
     hash_d = hmac.new(KEY, msg, hashlib.sha256).digest()
     return msg, hash_d, hash_c
 
-# cipher a message
-def encrypt( msg):
-    data = msg.encode()
-    hash = hmac.new(KEY, data, hashlib.sha256).digest()
-    padding = pad(data + hash)
-    raw = data + hash + padding.encode()
-    cipher = AES.new(KEY, AES.MODE_CBC, IV )
-    return cipher.encrypt( raw )
-
 # decipher a message then check if padding is good with unpad_verifier()
 def decrypt( enc):
-    decipher = AES.new(KEY, AES.MODE_CBC, IV )
+    decipher = AES.new(KEY, AES.MODE_CBC, IV)
     plaintext, signature_2, sig_c = unpad_verifier(decipher.decrypt( enc ))
 
     if signature_2 != sig_c:
         return 0
     return plaintext
-
-
-'''
-    the main attack start here
-    the function run(SECRET) will try to decipher the SECRET without knowing the key 
-    used for AES
-'''
 
 def split_len(seq, length):
     return [seq[i:i+length] for i in range(0, len(seq), length)]
