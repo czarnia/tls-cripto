@@ -51,17 +51,10 @@ def main():
 	
 	block=1
 	length_block=16
+	t=0
 
-	msg = ""
-	t=1
-
-	while (msg != b'0'.hex()):
-		
+	while (t != length_block):
 		msg = request_skt.receive_with_size()
-
-		if msg == b'0'.hex():
-			continue
-
 		global IV
 		IV = bytes.fromhex(request_skt.receive_with_size())
 		global KEY
@@ -84,13 +77,12 @@ def main():
 
 			print("\r[+] Encontré el byte \033[36m%s\033[0m - Block %d : [%16s]" % (decipher_byte, block, ''.join(tmp)))
 			request_skt.send_with_size("Adivinado")
-
-			if (t == 17):
-				request_skt.close()
-				skt.close()
-				exit()
+				
 		else:
 			request_skt.send_with_size("No adivinado")
+	
+	request_skt.close()
+	skt.close()
 
 if __name__ == '__main__':
 	main()
