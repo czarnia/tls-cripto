@@ -62,7 +62,7 @@ def main():
 		for char in range(LENGTH_BLOCK):
 			while True:
 				randkey()
-				
+
 				# Envío el bloque encriptado
 				skt.send_with_size(binascii.hexlify(encrypt("$"*16 + "#"*t + SECRET + "%"*(block*LENGTH_BLOCK - char))).hex())
 				# Envío el initializator para luego simular si el server "acepta" el paquete o no.

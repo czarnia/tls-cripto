@@ -48,51 +48,49 @@ def main():
 	print("Soy el Man in the Middle y estoy viendo los paquetes que viajan")
 
 	secret = []
-	t=1
+	
 	block=1
 	length_block=16
-	msg = "hola"
-	coming = 0
-	while (msg!=b'0'.hex()):
-		if (coming == 0):
-			msg = request_skt.receive_with_size()
-			coming +=1
-		if (coming == 1):
-			global IV
-			IV = bytes.fromhex(request_skt.receive_with_size())
-			coming +=1
-		if (coming == 2):
-			global KEY
-			KEY = bytes.fromhex(request_skt.receive_with_size())
-			coming = 0
-		count=0
+
+	msg = ""
+	t=1
+
+	while (msg != b'0'.hex()):
+		
+		msg = request_skt.receive_with_size()
+
+		if msg == b'0'.hex():
+			continue
+
+		global IV
+		IV = bytes.fromhex(request_skt.receive_with_size())
+		global KEY
+		KEY = bytes.fromhex(request_skt.receive_with_size())
+
 		msg = split_len(bytes.fromhex(msg),32)
 		msg[-1] = msg[block]
 		# send the request a get the result => padding error OR OK
 		cipher = binascii.unhexlify(b''.join(msg).decode())
 		plain = decrypt(cipher)
-		count += 1
 
 		if (plain != 0):
-			if (coming == 0):
-				t += 1
-				pbn = msg[-2]
-				pbi = msg[block - 1]
-				# padding is ok we found a byte
-				decipher_byte = chr(int("0f",16) ^ int(pbn[-2:],16) ^ int(pbi[-2:],16))
-				secret.append(decipher_byte)
-				tmp = secret[::-1]
-				sys.stdout.write("\r[+] Found byte \033[36m%s\033[0m - Block %d : [%16s]" % (decipher_byte, block, ''.join(tmp)))
-				sys.stdout.flush()
-				request_skt.send_with_size("Adivinado")
-				print("")
-				if (t == 17):
-					request_skt.close()
-					skt.close()
-					exit()
-				#break
+			t += 1
+			pbn = msg[-2]
+			pbi = msg[block - 1]
+			# padding is ok we found a byte
+			decipher_byte = chr(int("0f",16) ^ int(pbn[-2:],16) ^ int(pbi[-2:],16))
+			secret.append(decipher_byte)
+			tmp = secret[::-1]
+
+			print("\r[+] Encontré el byte \033[36m%s\033[0m - Block %d : [%16s]" % (decipher_byte, block, ''.join(tmp)))
+			request_skt.send_with_size("Adivinado")
+
+			if (t == 17):
+				request_skt.close()
+				skt.close()
+				exit()
 		else:
-			request_skt.send_with_size("No")
+			request_skt.send_with_size("No adivinado")
 
 if __name__ == '__main__':
 	main()
