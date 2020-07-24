@@ -45,7 +45,7 @@ def main():
 
 	msg = ""
 
-	SECRET = "CRIPTOFIUBA2020"
+	SECRET = "auth:CRIPTO2020"
 
 	secret = []
 
@@ -81,7 +81,7 @@ def main():
 
 				msg = skt.receive_with_size()
 				if (msg == "Adivinado"):
-					print ("Sigo enviando.")
+					print ("Sigo enviando según pedido.")
 					t += 1
 					break
 	skt.close()
