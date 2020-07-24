@@ -37,9 +37,6 @@ def encrypt( msg):
     cipher = AES.new(KEY, AES.MODE_CBC, IV)
     return cipher.encrypt( raw )
 
-def split_len(seq, length):
-    return [seq[i:i+length] for i in range(0, len(seq), length)]
-
 def main():
 	skt = StringSocket()
 

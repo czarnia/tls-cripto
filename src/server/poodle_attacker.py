@@ -11,21 +11,18 @@ sys.path.append('../')
 
 from common.string_socket import StringSocket
 
-IV = Random.new().read(AES.block_size )
-KEY = Random.new().read(AES.block_size )
-
 # unpad after the decryption 
 # return the msg, the hmac and the hmac of msg 
-def unpad_verifier(s):
+def unpad_verifier(s, key):
     msg = s[0:len(s) - 32 - ord(s[len(s)-1:]) - 1]
     hash_c = s[len(msg):-ord(s[len(s)-1:]) - 1]
-    hash_d = hmac.new(KEY, msg, hashlib.sha256).digest()
+    hash_d = hmac.new(key, msg, hashlib.sha256).digest()
     return msg, hash_d, hash_c
 
 # decipher a message then check if padding is good with unpad_verifier()
-def decrypt( enc):
-    decipher = AES.new(KEY, AES.MODE_CBC, IV)
-    plaintext, signature_2, sig_c = unpad_verifier(decipher.decrypt( enc ))
+def decrypt(enc, key, iv):
+    decipher = AES.new(key, AES.MODE_CBC, iv)
+    plaintext, signature_2, sig_c = unpad_verifier(decipher.decrypt(enc), key)
 
     if signature_2 != sig_c:
         return 0
@@ -55,22 +52,20 @@ def main():
 
 	while (t != length_block):
 		msg = request_skt.receive_with_size()
-		global IV
-		IV = bytes.fromhex(request_skt.receive_with_size())
-		global KEY
-		KEY = bytes.fromhex(request_skt.receive_with_size())
+		iv = bytes.fromhex(request_skt.receive_with_size())
+		key = bytes.fromhex(request_skt.receive_with_size())
 
 		msg = split_len(bytes.fromhex(msg),32)
 		msg[-1] = msg[block]
 		# send the request a get the result => padding error OR OK
 		cipher = binascii.unhexlify(b''.join(msg).decode())
-		plain = decrypt(cipher)
+		plain = decrypt(cipher, key, iv)
 
 		if (plain != 0):
 			t += 1
 			pbn = msg[-2]
 			pbi = msg[block - 1]
-			# padding is ok we found a byte
+			# padding is ok, we found a byte
 			decipher_byte = chr(int("0f",16) ^ int(pbn[-2:],16) ^ int(pbi[-2:],16))
 			secret.append(decipher_byte)
 			tmp = secret[::-1]
