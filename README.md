@@ -1,6 +1,8 @@
 # tls-cripto
 Repositorio para el trabajo final de Criptografía y Seguridad Informática, contiene las pruebas de concepto utilizadas para la realización del mismo.
 
+## POODLE Attack Demo
+
 ![Poodle Attack in Dockers!](https://raw.githubusercontent.com/czarnia/tls-cripto/Poodle-PoC/poodle-attack.gif)
 
 ## Requerimientos
@@ -20,3 +22,9 @@ Se tienen tres pruebas de concepto:
 
 Para usar las mismas se debe entrar a los containers con ``docker exec -it <nombre_del_container> /bin/sh`` y correr los distintos archivos python, siempre ejecutando primero el servidor y luego el cliente. Los resultados se verán por pantalla.
 Para eliminar los containers basta con ejecutar ``docker-compose down`` en una terminal parada dentro de la carpeta _root_ de este proyecto.
+
+### Prueba de Concepto del Ataque POODLE
+
+Una vez levantado los containers:
+- Ejecutar del lado del servidor ``python3 poodle_attacker.py``
+- Ejecutar del lado del cliente ``python3 poodle_client.py``
