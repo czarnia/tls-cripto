@@ -23,6 +23,18 @@ Se tienen tres pruebas de concepto:
 Para usar las mismas se debe entrar a los containers con ``docker exec -it <nombre_del_container> /bin/sh`` y correr los distintos archivos python, siempre ejecutando primero el servidor y luego el cliente. Los resultados se verán por pantalla.
 Para eliminar los containers basta con ejecutar ``docker-compose down`` en una terminal parada dentro de la carpeta _root_ de este proyecto.
 
+### Prueba de Concepto de TCP sin TLS
+
+Una vez levantado los containers:
+- Ejecutar del lado del servidor ``python3 non_tls_server.py``
+- Ejecutar del lado del cliente ``python3 non_tls_client.py``
+
+### Prueba de Concepto de TCP con TLS
+
+Una vez levantado los containers:
+- Ejecutar del lado del servidor ``python3 tls_server.py``
+- Ejecutar del lado del cliente ``python3 tls_client.py``
+
 ### Prueba de Concepto del Ataque POODLE
 
 Una vez levantado los containers:
