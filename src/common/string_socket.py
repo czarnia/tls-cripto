@@ -1,4 +1,5 @@
 import socket
+import ssl
 
 DEFAULT_SIZE = 20
 
@@ -11,6 +12,26 @@ class StringSocket(object):
             self.skt = skt
         else:
             self.skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    def use_ssl_client(self, server_cert, client_cert, client_key, server_sni_hostname):
+        '''Uses ssl for the client'''
+        context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=server_cert)
+        context.load_cert_chain(certfile=client_cert, keyfile=client_key)
+        self.skt = context.wrap_socket(self.skt, server_side=False, server_hostname=server_sni_hostname)
+
+    def accept_ssl(self, server_cert, server_key, client_certs):
+        '''Accepts a new connectio using SSL, a new StringSocket and
+        the connected address is returned'''
+        try:
+            context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            context.verify_mode = ssl.CERT_REQUIRED
+            context.load_cert_chain(certfile=server_cert, keyfile=server_key)
+            context.load_verify_locations(cafile=client_certs)
+
+            new_skt, addr = self.skt.accept()
+            return StringSocket(context.wrap_socket(new_skt, server_side=True)), addr
+        except socket.timeout:
+            return None, None
 
     def connect(self, host, port):
         '''Connects the socket to a given port and host'''

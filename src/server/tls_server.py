@@ -1,42 +1,31 @@
-#!/usr/bin/python3
+import sys
+sys.path.append('../')
 
-import socket
-from socket import AF_INET, SOCK_STREAM, SO_REUSEADDR, SOL_SOCKET, SHUT_RDWR
-import ssl
+from common.string_socket import StringSocket
 
-listen_addr = '0.0.0.0'
-listen_port = 8080
-server_cert = 'server.crt'
-server_key = 'server.key'
-client_certs = 'client.crt'
+SERVER_CERT = 'server.crt'
+SERVER_KEY = 'server.key'
+CLIENT_CERTS = 'client.crt'
 
-context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-context.verify_mode = ssl.CERT_REQUIRED
-context.load_cert_chain(certfile=server_cert, keyfile=server_key)
-context.load_verify_locations(cafile=client_certs)
+def main():
+    skt = StringSocket()
+    
+    skt.bind('0.0.0.0', 8080)
+    skt.listen(1)
+    print("Soy el servidor y estoy escuchando conexiones")
 
-bindsocket = socket.socket()
-bindsocket.bind((listen_addr, listen_port))
-bindsocket.listen(5)
+    request_skt, addr = skt.accept_ssl(SERVER_CERT, SERVER_KEY, CLIENT_CERTS)
 
-while True:
-    print("Waiting for client")
-    newsocket, fromaddr = bindsocket.accept()
-    print("Client connected: {}:{}".format(fromaddr[0], fromaddr[1]))
-    conn = context.wrap_socket(newsocket, server_side=True)
-    print("SSL established. Peer: {}".format(conn.getpeercert()))
-    buf = b''  # Buffer to hold received client data
-    try:
-        while True:
-            data = conn.recv(4096)
-            if data:
-                # Client sent us data. Append to buffer
-                buf += data
-            else:
-                # No more data from client. Show buffer and close connection.
-                print("Received:", buf)
-                break
-    finally:
-        print("Closing connection")
-        conn.shutdown(socket.SHUT_RDWR)
-        conn.close()
+    print(f"Soy el servidor y acepte una conexion de: {addr}")
+    print("Soy el servidor y voy a enviar")
+
+    request_skt.send_with_size("Hola cliente!")
+
+    msg = request_skt.receive_with_size()
+    print(f"Soy el servidor y recibi: {msg}")
+
+    request_skt.close()
+    skt.close()
+
+if __name__ == '__main__':
+    main()
